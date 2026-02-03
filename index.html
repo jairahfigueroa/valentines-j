@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Be My Valentine?</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+      color: #ffffff;
+      overflow: hidden;
+      position: relative;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 30% 40%, rgba(255, 140, 0, 0.15) 0%, transparent 60%),
+                  radial-gradient(circle at 70% 60%, rgba(139, 69, 19, 0.1) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #app {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    .page.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .page-content {
+      width: 100%;
+      max-width: 500px;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .music-card {
+      margin: 0 auto;
+      width: 100%;
+      background: linear-gradient(to bottom, #2a2a2a 0%, #1a1a1a 100%);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6),
+                  0 0 1px rgba(255, 255, 255, 0.1) inset;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    .image-frame {
+      width: 100%;
+      aspect-ratio: 1;
+      margin-bottom: 1.5rem;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 3px solid rgba(255, 140, 0, 0.3);
+      position: relative;
+    }
+
+    .main-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .song-info {
+      margin-bottom: 1.5rem;
+      padding: 1rem 0;
+    }
+
+    .song-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .artist-name {
+      font-size: 1rem;
+      color: #b3b3b3;
+      font-weight: 400;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin: 1.5rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff8c00, #ffa500);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .time-stamps {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #b3b3b3;
+      margin-bottom: 1rem;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .control-btn {
+      background: none;
+      border: none;
+      color: #ffffff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.5rem;
+      opacity: 0.7;
+    }
+
+    .control-btn:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .play-btn {
+      width: 50px;
+      height: 50px;
+      background: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #000000;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 140, 0, 0.5);
+    }
+
+    .play-instruction {
+      position: absolute;
+      bottom: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #ffa500;
+      font-size: 1.2rem;
+      font-weight: 600;
+      animation: bounce 1.5s ease-in-out infinite;
+    }
+
+    .arrow-down {
+      font-size: 1.5rem;
+      animation: arrowBounce 1.5s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateX(-50%) translateY(0);
+      }
+      50% {
+        transform: translateX(-50%) translateY(-10px);
+      }
+    }
+
+    @keyframes arrowBounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(5px);
+      }
+    }
+
+    .nav-btn {
+      position: fixed;
+      bottom: 3rem;
+      padding: 0.9rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #ff8c00, #ffa500);
+      color: #ffffff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3);
+      z-index: 10;
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(255, 140, 0, 0.5);
+    }
+
+    .prev-btn {
+      left: 3rem;
+    }
+
+    .next-btn {
+      right: 3rem;
+    }
+
+    .page-indicator {
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffa500;
+      background: rgba(255, 140, 0, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 140, 0, 0.3);
+    }
+
+    .question-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .question {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ff8c00, #ffa500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 3rem;
+      line-height: 1.2;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
+      padding-left: 1.5rem;
+    }
+
+    .answer-btn {
+      padding: 1.2rem 3rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 140px;
+    }
+
+    .yes-btn {
+      background: linear-gradient(135deg, #ff8c00, #ffa500);
+      color: #ffffff;
+      box-shadow: 0 10px 30px rgba(255, 140, 0, 0.4);
+    }
+
+    .yes-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 40px rgba(255, 140, 0, 0.6);
+    }
+
+    .no-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .no-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.05);
+    }
+
+    .success-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(135deg, rgba(255, 140, 0, 0.95), rgba(255, 165, 0, 0.95));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.6s ease;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .success-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .success-content {
+      text-align: center;
+      color: #ffffff;
+      animation: popIn 0.6s ease;
+    }
+
+    .success-title {
+      font-size: 5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .success-message {
+      font-size: 2rem;
+      font-weight: 400;
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+      70% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0) scale(0);
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .question {
+        font-size: 2rem;
+      }
+
+      .answer-btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        min-width: 110px;
+      }
+
+      .nav-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+      }
+
+      .prev-btn {
+        left: 1.5rem;
+      }
+
+      .next-btn {
+        right: 1.5rem;
+      }
+
+      .page-content {
+        padding: 1rem;
+        max-width: 400px;
+      }
+
+      .success-title {
+        font-size: 3.5rem;
+      }
+
+      .success-message {
+        font-size: 1.5rem;
+      }
+
+      .song-title {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .question {
+        font-size: 1.6rem;
+      }
+
+      .button-container {
+        display: flex;
+        gap: 2rem;
+        margin-top: 2rem;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+      }
+
+      .answer-btn {
+        
+        padding: 0.9rem 1.8rem;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Page 1 -->
+    <section class="page active" id="page1">
+      <div class="page-content">
+        <div class="music-card">
+          <div class="image-frame">
+            <img src="images/Screenshot 2026-02-02 at 5.18.28 PM.png" alt="Memory 1" class="main-image">
+          </div>
+          <div class="song-info">
+            <div class="song-title"></div>
+            <div class="artist-name">Memory 1 of 5</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 20%"></div>
+          </div>
+          <div class="time-stamps">
+            <span>0:13</span>
+            <span>3:17</span>
+          </div>
+          <div class="controls" style="position: relative;">
+            <button class="control-btn">⏮</button>
+            <button class="control-btn">⏯</button>
+            <div class="play-btn" id="mainPlayBtn" onclick="playMusic()">▶</div>
+            <button class="control-btn">⏸</button>
+            <button class="control-btn">⏭</button>
+            <div class="play-instruction">
+              <span>Play Me</span>
+              <span class="arrow-down">↓</span>
+            </div>
+          </div>
+        </div>
+        <button class="nav-btn next-btn" onclick="nextPage()">Next →</button>
+        <div class="page-indicator">1 / 5</div>
+      </div>
+    </section>
+
+    <!-- Page 2 -->
+    <section class="page" id="page2">
+      <div class="page-content">
+        <div class="music-card">
+          <div class="image-frame">
+            <img src="images/Screenshot 2026-02-02 at 5.17.01 PM.png" alt="Memory 2" class="main-image">
+          </div>
+          <div class="song-info">
+            <div class="song-title">Beautiful Moments</div>
+            <div class="artist-name">Memory 2 of 5</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 40%"></div>
+          </div>
+          <div class="time-stamps">
+            <span>1:21</span>
+            <span>3:17</span>
+          </div>
+          <div class="controls">
+            <button class="control-btn">⏮</button>
+            <button class="control-btn">⏯</button>
+            <div class="play-btn">▶</div>
+            <button class="control-btn">⏸</button>
+            <button class="control-btn">⏭</button>
+          </div>
+        </div>
+        <button class="nav-btn prev-btn" onclick="prevPage()">← Back</button>
+        <button class="nav-btn next-btn" onclick="nextPage()">Next →</button>
+        <div class="page-indicator">2 / 5</div>
+      </div>
+    </section>
+
+    <!-- Page 3 -->
+    <section class="page" id="page3">
+      <div class="page-content">
+        <div class="music-card">
+          <div class="image-frame">
+            <img src="images/Screenshot 2026-02-02 at 5.17.48 PM.png" alt="Memory 3" class="main-image">
+          </div>
+          <div class="song-info">
+            <div class="song-title">Together Forever</div>
+            <div class="artist-name">Memory 3 of 5</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 60%"></div>
+          </div>
+          <div class="time-stamps">
+            <span>1:58</span>
+            <span>3:17</span>
+          </div>
+          <div class="controls">
+            <button class="control-btn">⏮</button>
+            <button class="control-btn">⏯</button>
+            <div class="play-btn">▶</div>
+            <button class="control-btn">⏸</button>
+            <button class="control-btn">⏭</button>
+          </div>
+        </div>
+        <button class="nav-btn prev-btn" onclick="prevPage()">← Back</button>
+        <button class="nav-btn next-btn" onclick="nextPage()">Next →</button>
+        <div class="page-indicator">3 / 5</div>
+      </div>
+    </section>
+
+    <!-- Page 4 -->
+    <section class="page" id="page4">
+      <div class="page-content">
+        <div class="music-card">
+          <div class="image-frame">
+            <img src="images/Screenshot 2026-02-02 at 5.20.00 PM.png" alt="Memory 4" class="main-image">
+          </div>
+          <div class="song-info">
+            <div class="song-title">Special Times</div>
+            <div class="artist-name">Memory 4 of 5</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 80%"></div>
+          </div>
+          <div class="time-stamps">
+            <span>2:38</span>
+            <span>3:17</span>
+          </div>
+          <div class="controls">
+            <button class="control-btn">⏮</button>
+            <button class="control-btn">⏯</button>
+            <div class="play-btn">▶</div>
+            <button class="control-btn">⏸</button>
+            <button class="control-btn">⏭</button>
+          </div>
+        </div>
+        <button class="nav-btn prev-btn" onclick="prevPage()">← Back</button>
+        <button class="nav-btn next-btn" onclick="nextPage()">Next →</button>
+        <div class="page-indicator">4 / 5</div>
+      </div>
+    </section>
+
+    <!-- Page 5 - The Question -->
+    <section class="page" id="page5">
+      <div class="page-content question-page">
+        <div class="music-card">
+          <h1 class="question">Will you be my Valentine?</h1>
+          <div class="button-container">
+            <button class="answer-btn yes-btn" onclick="handleYes()">Yes</button>
+            <button class="answer-btn no-btn" onclick="handleNo()">No</button>
+          </div>
+        </div>
+        <button class="nav-btn prev-btn" onclick="prevPage()">← Back</button>
+        <div class="page-indicator">5 / 5</div>
+      </div>
+    </section>
+
+    <!-- Success Message -->
+    <div class="success-overlay" id="successOverlay">
+      <div class="success-content">
+        <img src="images/Screenshot 2026-02-02 at 5.20.23 PM.png" alt="Happy Dog" style="width: 300px; height: auto; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+        <h1 class="success-title"> </h1>
+        <p class="success-message"></p>
+      </div>
+    </div>
+
+    <!-- Sad Message -->
+    <div class="success-overlay" id="sadOverlay" style="background: linear-gradient(135deg, rgba(100, 100, 100, 0.95), rgba(80, 80, 80, 0.95));">
+      <div class="success-content">
+        <h1 class="success-title">😢</h1>
+        <p class="success-message">Maybe next time...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentPage = 1;
+    const totalPages = 5;
+    let audio = null;
+    let isPlaying = false;
+
+    function playMusic() {
+      const playBtn = document.getElementById('mainPlayBtn');
+      
+      if (!audio) {
+        // Create audio element - replace with your song file
+        audio = new Audio('images/Olivia-Dean---So-Easy--To-Fall-In-Love--Bazeafrika.com.mp3');
+        // Note: Place the Olivia Dean "So Easy (To Fall in Love)" song file 
+        // in the same folder as this HTML and name it "song.mp3"
+        audio.loop = true; // Loop the song
+      }
+
+      if (isPlaying) {
+        audio.pause();
+        playBtn.innerHTML = '▶';
+        isPlaying = false;
+      } else {
+        audio.play().catch(e => {
+          console.log('Audio play failed:', e);
+          alert('Please add the song file (song.mp3) to the same folder as this HTML file');
+        });
+        playBtn.innerHTML = '⏸';
+        isPlaying = true;
+        
+        // Hide the "Play Me" instruction after first click
+        const instruction = document.querySelector('.play-instruction');
+        if (instruction) {
+          instruction.style.display = 'none';
+        }
+      }
+    }
+
+    function nextPage() {
+      if (currentPage < totalPages) {
+        document.getElementById(`page${currentPage}`).classList.remove('active');
+        currentPage++;
+        document.getElementById(`page${currentPage}`).classList.add('active');
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        document.getElementById(`page${currentPage}`).classList.remove('active');
+        currentPage--;
+        document.getElementById(`page${currentPage}`).classList.add('active');
+      }
+    }
+
+    function handleYes() {
+      const overlay = document.getElementById('successOverlay');
+      overlay.classList.add('show');
+
+      const duration = 3000;
+      const interval = 50;
+      const steps = duration / interval;
+      let currentStep = 0;
+
+      const heartEmojis = ['💕', '💖', '💗', '💓', '💝', '❤️', '💘'];
+
+      const heartInterval = setInterval(() => {
+        if (currentStep >= steps) {
+          clearInterval(heartInterval);
+          return;
+        }
+
+        const heart = document.createElement('div');
+        heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+        heart.style.position = 'fixed';
+        heart.style.left = Math.random() * 100 + '%';
+        heart.style.top = Math.random() * 100 + '%';
+        heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
+        heart.style.opacity = '0';
+        heart.style.animation = 'float 2s ease-in-out';
+        heart.style.pointerEvents = 'none';
+        heart.style.zIndex = '1001';
+
+        document.body.appendChild(heart);
+
+        setTimeout(() => {
+          heart.style.opacity = '1';
+        }, 10);
+
+        setTimeout(() => {
+          heart.remove();
+        }, 2000);
+
+        currentStep++;
+      }, interval);
+    }
+
+    function handleNo() {
+      const overlay = document.getElementById('sadOverlay');
+      overlay.classList.add('show');
+      
+      setTimeout(() => {
+        overlay.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
